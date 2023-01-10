@@ -4,7 +4,10 @@ use core::fmt::{self, Alignment, Debug, Display, Write};
 impl Display for Version {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         let do_display = |formatter: &mut fmt::Formatter| -> fmt::Result {
-            write!(formatter, "{}.{}.{}", self.major, self.minor, self.patch)?;
+            write!(formatter, "{}.{}", self.major, self.minor)?;
+            if let Some(patch) = self.patch {
+                write!(formatter, ".{}", patch)?;
+            }
             if !self.pre.is_empty() {
                 write!(formatter, "-{}", self.pre)?;
             }
@@ -18,8 +21,11 @@ impl Display for Version {
             digits(self.major)
                 + 1
                 + digits(self.minor)
-                + 1
-                + digits(self.patch)
+                + if let Some(patch) = self.patch {
+                    1 + digits(patch)
+                } else {
+                    0
+                }
                 + !self.pre.is_empty() as usize
                 + self.pre.len()
                 + !self.build.is_empty() as usize

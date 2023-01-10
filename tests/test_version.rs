@@ -29,11 +29,9 @@ fn test_parse() {
         "unexpected end of input while parsing major version number",
     );
 
-    let err = version_err("1.2");
-    assert_to_string(
-        err,
-        "unexpected end of input while parsing minor version number",
-    );
+    let parsed = version("1.2");
+    let expected = Version::new(1, 2, None);
+    assert_eq!(parsed, expected);
 
     let err = version_err("1.2.3-");
     assert_to_string(err, "empty identifier segment in pre-release identifier");
@@ -51,12 +49,12 @@ fn test_parse() {
     assert_to_string(err, "invalid leading zero in pre-release identifier");
 
     let parsed = version("1.2.3");
-    let expected = Version::new(1, 2, 3);
+    let expected = Version::new(1, 2, Some(3));
     assert_eq!(parsed, expected);
     let expected = Version {
         major: 1,
         minor: 2,
-        patch: 3,
+        patch: Some(3),
         pre: Prerelease::EMPTY,
         build: BuildMetadata::EMPTY,
     };
@@ -66,7 +64,7 @@ fn test_parse() {
     let expected = Version {
         major: 1,
         minor: 2,
-        patch: 3,
+        patch: Some(3),
         pre: prerelease("alpha1"),
         build: BuildMetadata::EMPTY,
     };
@@ -76,7 +74,17 @@ fn test_parse() {
     let expected = Version {
         major: 1,
         minor: 2,
-        patch: 3,
+        patch: Some(3),
+        pre: Prerelease::EMPTY,
+        build: build_metadata("build5"),
+    };
+    assert_eq!(parsed, expected);
+
+    let parsed = version("1.2+build5");
+    let expected = Version {
+        major: 1,
+        minor: 2,
+        patch: None,
         pre: Prerelease::EMPTY,
         build: build_metadata("build5"),
     };
@@ -86,7 +94,7 @@ fn test_parse() {
     let expected = Version {
         major: 1,
         minor: 2,
-        patch: 3,
+        patch: Some(3),
         pre: Prerelease::EMPTY,
         build: build_metadata("5build"),
     };
@@ -96,7 +104,7 @@ fn test_parse() {
     let expected = Version {
         major: 1,
         minor: 2,
-        patch: 3,
+        patch: Some(3),
         pre: prerelease("alpha1"),
         build: build_metadata("build5"),
     };
@@ -106,7 +114,7 @@ fn test_parse() {
     let expected = Version {
         major: 1,
         minor: 2,
-        patch: 3,
+        patch: Some(3),
         pre: prerelease("1.alpha1.9"),
         build: build_metadata("build5.7.3aedf"),
     };
@@ -116,7 +124,7 @@ fn test_parse() {
     let expected = Version {
         major: 1,
         minor: 2,
-        patch: 3,
+        patch: Some(3),
         pre: prerelease("0a.alpha1.9"),
         build: build_metadata("05build.7.3aedf"),
     };
@@ -126,7 +134,7 @@ fn test_parse() {
     let expected = Version {
         major: 0,
         minor: 4,
-        patch: 0,
+        patch: Some(0),
         pre: prerelease("beta.1"),
         build: build_metadata("0851523"),
     };
@@ -137,7 +145,7 @@ fn test_parse() {
     let expected = Version {
         major: 1,
         minor: 1,
-        patch: 0,
+        patch: Some(0),
         pre: prerelease("beta-10"),
         build: BuildMetadata::EMPTY,
     };

@@ -26,7 +26,7 @@
 //!     let version = Version {
 //!         major: 1,
 //!         minor: 2,
-//!         patch: 3,
+//!         patch: Some(3),
 //!         pre: Prerelease::new("alpha.1").unwrap(),
 //!         build: BuildMetadata::EMPTY,
 //!     };
@@ -60,6 +60,7 @@
 //!
 //! [Specifying Dependencies]: https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html
 
+#![feature(let_chains)]
 #![doc(html_root_url = "https://docs.rs/semver/1.0.16")]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![cfg_attr(all(not(feature = "std"), not(no_alloc_crate)), no_std)]
@@ -162,7 +163,7 @@ pub use crate::parse::Error;
 pub struct Version {
     pub major: u64,
     pub minor: u64,
-    pub patch: u64,
+    pub patch: Option<u64>,
     pub pre: Prerelease,
     pub build: BuildMetadata,
 }
@@ -385,7 +386,7 @@ impl Version {
     /// ```
     /// # use semver::{BuildMetadata, Prerelease, Version};
     /// #
-    /// # const fn new(major: u64, minor: u64, patch: u64) -> Version {
+    /// # const fn new(major: u64, minor: u64, patch: Option<u64>) -> Version {
     /// Version {
     ///     major,
     ///     minor,
@@ -395,7 +396,7 @@ impl Version {
     /// }
     /// # }
     /// ```
-    pub const fn new(major: u64, minor: u64, patch: u64) -> Self {
+    pub const fn new(major: u64, minor: u64, patch: Option<u64>) -> Self {
         Version {
             major,
             minor,

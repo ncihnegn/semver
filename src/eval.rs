@@ -53,9 +53,8 @@ fn matches_exact(cmp: &Comparator, ver: &Version) -> bool {
     }
 
     if let Some(patch) = cmp.patch {
-        if ver.patch != patch {
-            return false;
-        }
+        if let Some(ver_patch) = ver.patch && ver_patch != patch {
+        return false;}
     }
 
     ver.pre == cmp.pre
@@ -78,8 +77,12 @@ fn matches_greater(cmp: &Comparator, ver: &Version) -> bool {
     match cmp.patch {
         None => return false,
         Some(patch) => {
-            if ver.patch != patch {
-                return ver.patch > patch;
+            if let Some(ver_patch) = ver.patch {
+                if ver_patch != patch {
+                    return ver_patch > patch;
+                }
+            } else {
+                return false;
             }
         }
     }
@@ -104,8 +107,12 @@ fn matches_less(cmp: &Comparator, ver: &Version) -> bool {
     match cmp.patch {
         None => return false,
         Some(patch) => {
-            if ver.patch != patch {
-                return ver.patch < patch;
+            if let Some(ver_patch) = ver.patch {
+                if ver_patch != patch {
+                    return ver_patch < patch;
+                }
+            } else {
+                return false;
             }
         }
     }
@@ -125,8 +132,12 @@ fn matches_tilde(cmp: &Comparator, ver: &Version) -> bool {
     }
 
     if let Some(patch) = cmp.patch {
-        if ver.patch != patch {
-            return ver.patch > patch;
+        if let Some(ver_patch) = ver.patch {
+            if ver_patch != patch {
+                return ver_patch > patch;
+            }
+        } else {
+            return false;
         }
     }
 
@@ -157,16 +168,16 @@ fn matches_caret(cmp: &Comparator, ver: &Version) -> bool {
     if cmp.major > 0 {
         if ver.minor != minor {
             return ver.minor > minor;
-        } else if ver.patch != patch {
-            return ver.patch > patch;
+        } else if let Some(ver_patch) = ver.patch && ver_patch != patch {
+            return ver_patch > patch;
         }
     } else if minor > 0 {
         if ver.minor != minor {
             return false;
-        } else if ver.patch != patch {
-            return ver.patch > patch;
+        } else if let Some(ver_patch) = ver.patch && ver_patch != patch {
+            return ver_patch > patch;
         }
-    } else if ver.minor != minor || ver.patch != patch {
+    } else if ver.minor != minor || ver.patch != Some(patch) {
         return false;
     }
 
@@ -176,6 +187,6 @@ fn matches_caret(cmp: &Comparator, ver: &Version) -> bool {
 fn pre_is_compatible(cmp: &Comparator, ver: &Version) -> bool {
     cmp.major == ver.major
         && cmp.minor == Some(ver.minor)
-        && cmp.patch == Some(ver.patch)
+        && cmp.patch == ver.patch
         && !cmp.pre.is_empty()
 }

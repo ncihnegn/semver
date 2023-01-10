@@ -32,10 +32,18 @@ impl FromStr for Version {
 
         pos = Position::Minor;
         let (minor, text) = numeric_identifier(text, pos)?;
-        let text = dot(text, pos)?;
 
-        pos = Position::Patch;
-        let (patch, text) = numeric_identifier(text, pos)?;
+        if text.is_empty() {
+            return Ok(Version::new(major, minor, None));
+        }
+
+        let (patch, text) = if let Some(text) = text.strip_prefix('.') {
+            pos = Position::Patch;
+            let (patch, text) = numeric_identifier(text, pos)?;
+            (Some(patch), text)
+        } else {
+            (None, text)
+        };
 
         if text.is_empty() {
             return Ok(Version::new(major, minor, patch));
